@@ -1,0 +1,226 @@
+// My Covid Record App.cpp : This file contains the 'main' function. Program execution begins and ends there.
+//
+#include <iostream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+
+class User {
+public:
+    std::string username;
+    std::string password;
+    std::string details;
+    std::string covidRecords;
+    std::string qrCode;
+
+    // Default constructor
+    User() : username(""), password(""), details(""), covidRecords(""), qrCode("") {}
+
+    // Parameterized constructor
+    User(std::string uname, std::string pass) : username(uname), password(pass) {}
+};
+
+class System {
+private:
+    std::unordered_map<std::string, User> users;
+    std::string adminUsername;
+    std::string adminPassword;
+
+    void logActivity(const std::string& message) {
+        // Placeholder function for logging activities
+        std::cout << "Log: " << message << std::endl;
+    }
+
+public:
+    System(std::string adminUser, std::string adminPass) : adminUsername(adminUser), adminPassword(adminPass) {}
+
+    void createUser() {
+        std::string uname, pass;
+        std::cout << "Enter username: ";
+        std::cin >> uname;
+        std::cout << "Enter password: ";
+        std::cin >> pass;
+        users[uname] = User(uname, pass);
+        std::cout << "User created successfully!\n";
+        logActivity("User created: " + uname);
+    }
+
+    bool login(const std::string& uname, const std::string& pass) {
+        if (users.find(uname) != users.end() && users[uname].password == pass) {
+            return true;
+        }
+        else {
+            std::cout << "Invalid username or password.\n";
+            return false;
+        }
+    }
+
+    bool adminLogin(const std::string& uname, const std::string& pass) {
+        return uname == adminUsername && pass == adminPassword;
+    }
+
+    void viewUserDetails(const std::string& uname) {
+        if (users.find(uname) != users.end()) {
+            std::cout << "Details for " << uname << ": " << users[uname].details << "\n";
+        }
+        else {
+            std::cout << "User not found.\n";
+        }
+    }
+
+    void modifyUserDetails(const std::string& uname, const std::string& newDetails) {
+        if (users.find(uname) != users.end()) {
+            users[uname].details = newDetails;
+            std::cout << "User details updated.\n";
+            logActivity("User details modified: " + uname);
+        }
+        else {
+            std::cout << "User not found.\n";
+        }
+    }
+
+    void uploadUserDocument(const std::string& uname, const std::string& document) {
+        if (users.find(uname) != users.end()) {
+            users[uname].covidRecords = document;
+            std::cout << "Document uploaded for " << uname << ".\n";
+            logActivity("Document uploaded for user: " + uname);
+        }
+        else {
+            std::cout << "User not found.\n";
+        }
+    }
+
+    void uploadQrCode(const std::string& uname, const std::string& code) {
+        if (users.find(uname) != users.end()) {
+            users[uname].qrCode = code;
+            std::cout << "QR Code uploaded for " << uname << ".\n";
+            logActivity("QR Code uploaded for user: " + uname);
+        }
+        else {
+            std::cout << "User not found.\n";
+        }
+    }
+
+    void reportIssue(const std::string& uname, const std::string& issue) {
+        std::cout << "Issue reported by " << uname << ": " << issue << "\n";
+        logActivity("Issue reported by user: " + uname);
+    }
+
+    void displayUserRecords(const std::string& uname) {
+        if (users.find(uname) != users.end()) {
+            std::cout << "COVID-19 Records for " << uname << ": " << users[uname].covidRecords << "\n";
+        }
+        else {
+            std::cout << "User not found.\n";
+        }
+    }
+
+    void displayUserQrCode(const std::string& uname) {
+        if (users.find(uname) != users.end()) {
+            std::cout << "QR Code for " << uname << ": " << users[uname].qrCode << "\n";
+        }
+        else {
+            std::cout << "User not found.\n";
+        }
+    }
+};
+
+int main() {
+    System mySystem("admin", "adminpass");
+
+    int choice;
+    while (true) {
+        std::cout << "1. Create User\n2. Login\n3. Admin Login\n4. Exit\nChoose an option: ";
+        std::cin >> choice;
+        if (choice == 1) {
+            mySystem.createUser();
+        }
+        else if (choice == 2) {
+            std::string uname, pass;
+            std::cout << "Enter username: ";
+            std::cin >> uname;
+            std::cout << "Enter password: ";
+            std::cin >> pass;
+            if (mySystem.login(uname, pass)) {
+                int userChoice;
+                while (true) {
+                    std::cout << "1. View Details\n2. View COVID-19 Records\n3. View QR Code\n4. Report Issue\n5. Logout\nChoose an option: ";
+                    std::cin >> userChoice;
+                    if (userChoice == 1) {
+                        mySystem.viewUserDetails(uname);
+                    }
+                    else if (userChoice == 2) {
+                        mySystem.displayUserRecords(uname);
+                    }
+                    else if (userChoice == 3) {
+                        mySystem.displayUserQrCode(uname);
+                    }
+                    else if (userChoice == 4) {
+                        std::string issue;
+                        std::cout << "Describe the issue: ";
+                        std::cin.ignore();
+                        std::getline(std::cin, issue);
+                        mySystem.reportIssue(uname, issue);
+                    }
+                    else if (userChoice == 5) {
+                        break;
+                    }
+                }
+            }
+        }
+        else if (choice == 3) {
+            std::string uname, pass;
+            std::cout << "Enter admin username: ";
+            std::cin >> uname;
+            std::cout << "Enter admin password: ";
+            std::cin >> pass;
+            if (mySystem.adminLogin(uname, pass)) {
+                int adminChoice;
+                while (true) {
+                    std::cout << "1. View User Details\n2. Modify User Details\n3. Upload User Document\n4. Upload QR Code\n5. Logout\nChoose an option: ";
+                    std::cin >> adminChoice;
+                    if (adminChoice == 1) {
+                        std::cout << "Enter username: ";
+                        std::cin >> uname;
+                        mySystem.viewUserDetails(uname);
+                    }
+                    else if (adminChoice == 2) {
+                        std::cout << "Enter username: ";
+                        std::cin >> uname;
+                        std::string newDetails;
+                        std::cout << "Enter new details: ";
+                        std::cin.ignore();
+                        std::getline(std::cin, newDetails);
+                        mySystem.modifyUserDetails(uname, newDetails);
+                    }
+                    else if (adminChoice == 3) {
+                        std::cout << "Enter username: ";
+                        std::cin >> uname;
+                        std::string document;
+                        std::cout << "Enter document details: ";
+                        std::cin.ignore();
+                        std::getline(std::cin, document);
+                        mySystem.uploadUserDocument(uname, document);
+                    }
+                    else if (adminChoice == 4) {
+                        std::cout << "Enter username: ";
+                        std::cin >> uname;
+                        std::string code;
+                        std::cout << "Enter QR Code: ";
+                        std::cin.ignore();
+                        std::getline(std::cin, code);
+                        mySystem.uploadQrCode(uname, code);
+                    }
+                    else if (adminChoice == 5) {
+                        break;
+                    }
+                }
+            }
+        }
+        else if (choice == 4) {
+            break;
+        }
+    }
+
+    return 0;
+}
